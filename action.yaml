@@ -2,26 +2,107 @@ name: "Create Or Update Ref"
 description: "Create Or Update Ref Action"
 
 inputs:
-  placeholder:
-    description: "Placeholder input to be replaced by real inputs"
-    required: true
-    default: "placeholder"
+  github_token:
+    description: "Github token used for API calls. Required scope - 'contents: write'"
 
-outputs:
-  placeholder:
-    description: "Placeholder output to be replaced by real outputs"
-    value: ${{steps.placeholder.outputs.placeholder }}
+  owner:
+    description: "Owner of the repository"
+
+  repo:
+    description: "Repository name"
+
+  ref:
+    description: "Ref name"
+    required: true
+
+  sha:
+    description: "Ref SHA"
+    required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Placeholder
-      id: placeholder
+    - name: Ensure owner
+      id: ensure-owner
       shell: bash
       run: |
-        echo "::set-output name=placeholder::${{ inputs.placeholder }}"
+        # Ensuring `owner` input, using repository owner if not provided
+        owner=${{ inputs.owner }}
+        if [[ -z "$owner" ]]; then
+          owner=${{ github.repository_owner }}
+        fi
+        echo "owner=${owner}" >> $GITHUB_OUTPUT
 
-# https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#branding
+    - name: Ensure repo
+      id: ensure-repo
+      shell: bash
+      run: |
+        # Ensuring `repo` input, using repository if not provided
+        repo=${{ inputs.repo }}
+        if [[ -z "$repo" ]]; then
+        repo=${{ github.event.repository.name }}
+        fi
+        echo "repo=${repo}" >> $GITHUB_OUTPUT
+
+    - name: Ensure token
+      id: ensure-token
+      shell: bash
+      run: |
+        # Ensuring `github_token` input, using `github.token` variable if not provided
+        github_token=${{ inputs.github_token }}
+        if [[ -z "$github_token" ]]; then
+          github_token=${{ github.token }}
+        fi
+        echo "github_token=${github_token}" >> $GITHUB_OUTPUT
+
+    - name: Get ref info
+      id: get-ref-info
+      uses: ovsds/get-ref-info-action@v1
+      with:
+        github_token: ${{ steps.ensure-token.outputs.github_token }}
+        owner: ${{ steps.ensure-owner.outputs.owner }}
+        repo: ${{ steps.ensure-repo.outputs.repo }}
+        ref: ${{ inputs.ref }}
+
+    - name: Create ref
+      if: ${{ steps.get-ref-info.outputs.exists == 'false' }}
+      shell: bash
+      run: |
+        # Create ref
+        owner=${{ steps.ensure-owner.outputs.owner }}
+        repo=${{ steps.ensure-repo.outputs.repo }}
+        ref=${{ inputs.ref }}
+        sha=${{ inputs.sha }}
+
+        gh api \
+          --method POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /repos/$owner/$repo/git/refs \
+          -F ref=refs/$ref \
+          -F sha=$sha
+      env:
+        GH_TOKEN: ${{ steps.ensure-token.outputs.github_token }}
+
+    - name: Update ref
+      if: ${{ steps.get-ref-info.outputs.exists == 'true' }}
+      shell: bash
+      run: |
+        # Update ref
+        owner=${{ steps.ensure-owner.outputs.owner }}
+        repo=${{ steps.ensure-repo.outputs.repo }}
+        ref=${{ inputs.ref }}
+        sha=${{ inputs.sha }}
+
+        gh api \
+          --method PATCH \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /repos/$owner/$repo/git/refs/$ref \
+          -F sha=$sha
+      env:
+        GH_TOKEN: ${{ steps.ensure-token.outputs.github_token }}
+
 branding:
   icon: "message-square"
   color: "gray-dark"

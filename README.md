@@ -10,20 +10,22 @@ Create Or Update Ref Action
 ### Example
 
 ```yaml
-
+- name: Create or update ref
+  id: create-or-update-ref
+  uses: ovsds/create-or-update-ref-action@v1
+  with:
+    ref: tags/v1
+    sha: ${{ github.sha }}
 ```
 
 ### Action Inputs
 
-| Name          | Description  | Default |
-| ------------- | ------------ | ------- |
-| `placeholder` | Placeholder. |         |
-
-### Action Outputs
-
-| Name          | Description  |
-| ------------- | ------------ |
-| `placeholder` | Placeholder. |
+| Name           | Description                                                         | Default                             |
+| -------------- | ------------------------------------------------------------------- | ----------------------------------- |
+| `github_token` | Github token used for API calls. Required scope - 'contents: write' | ${{ github.token }}                 |
+| `owner`        | Repository owner.                                                   | ${{ github.repository_owner }}      |
+| `repo`         | Repository name.                                                    | ${{ github.event.repository.name }} |
+| `ref`          | Target ref name.                                                    |                                     |
 
 ## Development
 
