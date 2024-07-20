@@ -3,7 +3,7 @@
 [![CI](https://github.com/ovsds/create-or-update-ref-action/workflows/Check%20PR/badge.svg)](https://github.com/ovsds/create-or-update-ref-action/actions?query=workflow%3A%22%22Check+PR%22%22)
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Create%20Or%20Update%20Ref-blue.svg)](https://github.com/marketplace/actions/create-or-update-ref)
 
-Create Or Update Ref Action
+Create ref with a given SHA or update it if it already exists.
 
 ## Usage
 
@@ -26,6 +26,7 @@ Create Or Update Ref Action
 | `owner`        | Repository owner.                                                   | ${{ github.repository_owner }}      |
 | `repo`         | Repository name.                                                    | ${{ github.event.repository.name }} |
 | `ref`          | Target ref name.                                                    |                                     |
+| `sha`          | SHA to be used for the ref.                                         |                                     |
 
 ## Development
 

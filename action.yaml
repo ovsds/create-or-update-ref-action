@@ -1,5 +1,5 @@
 name: "Create Or Update Ref"
-description: "Create Or Update Ref Action"
+description: "Create ref with a given SHA or update it if it already exists."
 
 inputs:
   github_token:
