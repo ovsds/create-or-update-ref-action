@@ -10,30 +10,51 @@ Create ref with a given SHA or update it if it already exists.
 ### Example
 
 ```yaml
-- name: Create or update ref
-  id: create-or-update-ref
-  uses: ovsds/create-or-update-ref-action@v1
-  with:
-    ref: tags/v1
-    sha: ${{ github.sha }}
+jobs:
+  create-or-update-ref:
+    permissions:
+      contents: write
+
+    steps:
+      - name: Create Or Update Ref
+        id: create-or-update-ref
+        uses: ovsds/create-or-update-ref-action@v1
+        with:
+          ref: tags/v1
+          sha: ${{ github.sha }}
 ```
 
 ### Action Inputs
 
-| Name           | Description                                                         | Default                             |
-| -------------- | ------------------------------------------------------------------- | ----------------------------------- |
-| `github_token` | Github token used for API calls. Required scope - 'contents: write' | ${{ github.token }}                 |
-| `owner`        | Repository owner.                                                   | ${{ github.repository_owner }}      |
-| `repo`         | Repository name.                                                    | ${{ github.event.repository.name }} |
-| `ref`          | Target ref name.                                                    |                                     |
-| `sha`          | SHA to be used for the ref.                                         |                                     |
+```yaml
+inputs:
+  github_token:
+    description: "Github token used for API calls. Required scope - 'contents: write'"
+    default: ${{ github.token }}
+
+  owner:
+    description: "Owner of the repository"
+    default: ${{ github.repository_owner }}
+
+  repo:
+    description: "Repository name"
+    default: ${{ github.event.repository.name }}
+
+  ref:
+    description: "Ref name"
+    required: true
+
+  sha:
+    description: "Ref SHA"
+    required: true
+```
 
 ## Development
 
 ### Global dependencies
 
-- nvm
-- node
+- [Taskfile](https://taskfile.dev/installation/)
+- [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#install--update-script)
 
 ### Taskfile commands
 

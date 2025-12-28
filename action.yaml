@@ -1,5 +1,11 @@
-name: "Create Or Update Ref"
-description: "Create ref with a given SHA or update it if it already exists."
+name: |
+  Create Or Update Ref
+description: |
+  Create ref with a given SHA or update it if it already exists.
+
+branding:
+  icon: "message-square"
+  color: "gray-dark"
 
 inputs:
   github_token:
@@ -72,7 +78,3 @@ runs:
           -F sha=$sha
       env:
         GH_TOKEN: ${{ inputs.github_token }}
-
-branding:
-  icon: "message-square"
-  color: "gray-dark"
