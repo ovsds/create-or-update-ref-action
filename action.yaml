@@ -45,19 +45,18 @@ runs:
       shell: bash
       run: |
         # Create ref
-        owner=${{ inputs.owner }}
-        repo=${{ inputs.repo }}
-        ref=${{ inputs.ref }}
-        sha=${{ inputs.sha }}
-
         gh api \
           --method POST \
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          /repos/$owner/$repo/git/refs \
-          -F ref=refs/$ref \
-          -F sha=$sha
+          /repos/${OWNER}/${REPO}/git/refs \
+          -F ref=refs/${REF} \
+          -F sha=${SHA}
       env:
+        OWNER: ${{ inputs.owner }}
+        REPO: ${{ inputs.repo }}
+        REF: ${{ inputs.ref }}
+        SHA: ${{ inputs.sha }}
         GH_TOKEN: ${{ inputs.github_token }}
 
     - name: Update ref
@@ -65,16 +64,15 @@ runs:
       shell: bash
       run: |
         # Update ref
-        owner=${{ inputs.owner }}
-        repo=${{ inputs.repo }}
-        ref=${{ inputs.ref }}
-        sha=${{ inputs.sha }}
-
         gh api \
           --method PATCH \
           -H "Accept: application/vnd.github+json" \
           -H "X-GitHub-Api-Version: 2022-11-28" \
-          /repos/$owner/$repo/git/refs/$ref \
-          -F sha=$sha
+          /repos/${OWNER}/${REPO}/git/refs/${REF} \
+          -F sha=${SHA}
       env:
+        OWNER: ${{ inputs.owner }}
+        REPO: ${{ inputs.repo }}
+        REF: ${{ inputs.ref }}
+        SHA: ${{ inputs.sha }}
         GH_TOKEN: ${{ inputs.github_token }}
