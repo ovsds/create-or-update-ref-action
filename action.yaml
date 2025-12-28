@@ -9,24 +9,34 @@ branding:
 
 inputs:
   github_token:
-    description: "Github token used for API calls. Required scope - 'contents: write'"
+    description: |
+      Github token used for API calls. Required scope - 'contents: write'
     default: ${{ github.token }}
 
   owner:
-    description: "Owner of the repository"
+    description: |
+      Owner of the repository
     default: ${{ github.repository_owner }}
 
   repo:
-    description: "Repository name"
+    description: |
+      Repository name
     default: ${{ github.event.repository.name }}
 
   ref:
-    description: "Ref name"
+    description: |
+      Ref name
     required: true
 
   sha:
-    description: "Ref SHA"
+    description: |
+      Ref SHA
     required: true
+
+  force:
+    description: |
+      Delete and create ref if it already exists instead of updating it
+    default: "false"
 
 runs:
   using: "composite"
@@ -40,8 +50,24 @@ runs:
         repo: ${{ inputs.repo }}
         ref: ${{ inputs.ref }}
 
+    - name: Delete ref
+      if: ${{ steps.get-ref-info.outputs.exists == 'true' && inputs.force == 'true' }}
+      shell: bash
+      run: |
+        # Delete ref
+        gh api \
+          --method DELETE \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          /repos/${OWNER}/${REPO}/git/refs/${REF}
+      env:
+        OWNER: ${{ inputs.owner }}
+        REPO: ${{ inputs.repo }}
+        REF: ${{ inputs.ref }}
+        GH_TOKEN: ${{ inputs.github_token }}
+
     - name: Create ref
-      if: ${{ steps.get-ref-info.outputs.exists == 'false' }}
+      if: ${{ steps.get-ref-info.outputs.exists == 'false' || inputs.force == 'true' }}
       shell: bash
       run: |
         # Create ref
@@ -60,7 +86,7 @@ runs:
         GH_TOKEN: ${{ inputs.github_token }}
 
     - name: Update ref
-      if: ${{ steps.get-ref-info.outputs.exists == 'true' }}
+      if: ${{ steps.get-ref-info.outputs.exists == 'true' && inputs.force != 'true' }}
       shell: bash
       run: |
         # Update ref

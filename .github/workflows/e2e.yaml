@@ -11,6 +11,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
+env:
+  TEST_COMMIT_SHA: "16a389cda9985019d8d0177dc5932b0ddb28eda4"
+  TEST_COMMIT2_SHA: "aedec651a919932ca5cefcada456b247e662a678"
+
 jobs:
   e2e-default:
     runs-on: ubuntu-latest
@@ -28,7 +32,7 @@ jobs:
         id: prepare-test-ref
         run: |
           short_sha=$(echo '${SHA}' | cut -c1-7)
-          ref="tags/e2e-default.$short_sha"
+          ref="tags/e2e-default-${short_sha}"
           echo "ref=$ref" >> $GITHUB_OUTPUT
         env:
           SHA: ${{ github.event.pull_request.head.sha }}
@@ -49,7 +53,11 @@ jobs:
         uses: ./
         with:
           ref: "${{ steps.prepare-test-ref.outputs.ref }}"
-          sha: "16a389cda9985019d8d0177dc5932b0ddb28eda4" # test_commit in test_branch
+          sha: "${{ env.TEST_COMMIT_SHA }}"
+
+      - name: Sleep to ensure ref is created
+        run: |
+          sleep 2
 
       - name: Get test ref info after Test Run
         id: get-test-ref-info-1
@@ -67,13 +75,17 @@ jobs:
         uses: nick-fields/assert-action@v2
         with:
           actual: ${{ steps.get-test-ref-info-1.outputs.sha }}
-          expected: "16a389cda9985019d8d0177dc5932b0ddb28eda4"
+          expected: "${{ env.TEST_COMMIT_SHA }}"
 
       - name: Test Run to validate overwriting
         uses: ./
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
-          sha: aedec651a919932ca5cefcada456b247e662a678 # test_commit2 in test_branch
+          sha: "${{ env.TEST_COMMIT2_SHA }}"
+
+      - name: Sleep to ensure ref is created
+        run: |
+          sleep 2
 
       - name: Get test ref info after Test Run to validate overwriting
         id: get-test-ref-info-2
@@ -91,7 +103,86 @@ jobs:
         uses: nick-fields/assert-action@v2
         with:
           actual: ${{ steps.get-test-ref-info-2.outputs.sha }}
-          expected: "aedec651a919932ca5cefcada456b247e662a678"
+          expected: "${{ env.TEST_COMMIT2_SHA }}"
+
+      - name: Delete test ref
+        if: success() || failure()
+        uses: ./.github/actions/delete-ref-action
+        with:
+          ref: ${{ steps.prepare-test-ref.outputs.ref }}
+          github_token: ${{ github.token }}
+
+  e2e-force:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Prepare test ref
+        id: prepare-test-ref
+        run: |
+          short_sha=$(echo '${SHA}' | cut -c1-7)
+          ref="tags/e2e-force-${short_sha}"
+          echo "ref=$ref" >> $GITHUB_OUTPUT
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
+
+      - name: Get test ref info before Test Run
+        id: get-test-ref-info-0
+        uses: ovsds/get-ref-info-action@v1
+        with:
+          ref: ${{ steps.prepare-test-ref.outputs.ref }}
+
+      - name: Assert not exists
+        uses: nick-fields/assert-action@v2
+        with:
+          actual: ${{ steps.get-test-ref-info-0.outputs.exists }}
+          expected: "false"
+
+      - name: Test Run
+        uses: ./
+        with:
+          ref: ${{ steps.prepare-test-ref.outputs.ref }}
+          sha: "${{ env.TEST_COMMIT_SHA }}"
+
+      - name: Sleep to ensure ref is created
+        run: |
+          sleep 2
+
+      - name: Test Run to validate overwriting
+        uses: ./
+        with:
+          ref: ${{ steps.prepare-test-ref.outputs.ref }}
+          sha: "${{ env.TEST_COMMIT2_SHA }}"
+          force: "true"
+
+      - name: Sleep to ensure ref is created
+        run: |
+          sleep 2
+
+      - name: Get test ref info after Test Run
+        id: get-test-ref-info-1
+        uses: ovsds/get-ref-info-action@v1
+        with:
+          ref: ${{ steps.prepare-test-ref.outputs.ref }}
+
+      - name: Assert exists
+        uses: nick-fields/assert-action@v2
+        with:
+          actual: ${{ steps.get-test-ref-info-1.outputs.exists }}
+          expected: "true"
+
+      - name: Assert sha
+        uses: nick-fields/assert-action@v2
+        with:
+          actual: ${{ steps.get-test-ref-info-1.outputs.sha }}
+          expected: "${{ env.TEST_COMMIT2_SHA }}"
 
       - name: Delete test ref
         if: success() || failure()
@@ -106,6 +197,7 @@ jobs:
 
     needs:
       - e2e-default
+      - e2e-force
 
     steps:
       - name: Collect Results
