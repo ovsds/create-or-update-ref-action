@@ -27,9 +27,11 @@ jobs:
       - name: Prepare test ref
         id: prepare-test-ref
         run: |
-          short_sha=$(echo '${{ github.event.pull_request.head.sha }}' | cut -c1-7)
+          short_sha=$(echo '${SHA}' | cut -c1-7)
           ref="tags/e2e-default.$short_sha"
           echo "ref=$ref" >> $GITHUB_OUTPUT
+        env:
+          SHA: ${{ github.event.pull_request.head.sha }}
 
       - name: Get test ref info before Test Run
         id: get-test-ref-info-0
