@@ -29,24 +29,34 @@ jobs:
 ```yaml
 inputs:
   github_token:
-    description: "Github token used for API calls. Required scope - 'contents: write'"
+    description: |
+      Github token used for API calls. Required scope - 'contents: write'
     default: ${{ github.token }}
 
   owner:
-    description: "Owner of the repository"
+    description: |
+      Owner of the repository
     default: ${{ github.repository_owner }}
 
   repo:
-    description: "Repository name"
+    description: |
+      Repository name
     default: ${{ github.event.repository.name }}
 
   ref:
-    description: "Ref name"
+    description: |
+      Ref name
     required: true
 
   sha:
-    description: "Ref SHA"
+    description: |
+      Ref SHA
     required: true
+
+  force:
+    description: |
+      Delete and create ref if it already exists instead of updating it
+    default: "false"
 ```
 
 ## Development
