@@ -31,7 +31,7 @@ jobs:
       - name: Prepare test ref
         id: prepare-test-ref
         run: |
-          short_sha=$(echo '${SHA}' | cut -c1-7)
+          short_sha=$(echo "${SHA}" | cut -c1-7)
           ref="tags/e2e-default-${short_sha}"
           echo "ref=$ref" >> $GITHUB_OUTPUT
         env:
@@ -127,7 +127,7 @@ jobs:
       - name: Prepare test ref
         id: prepare-test-ref
         run: |
-          short_sha=$(echo '${SHA}' | cut -c1-7)
+          short_sha=$(echo "${SHA}" | cut -c1-7)
           ref="tags/e2e-force-${short_sha}"
           echo "ref=$ref" >> $GITHUB_OUTPUT
         env:
