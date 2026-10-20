@@ -106,7 +106,7 @@ jobs:
           expected: "${{ env.TEST_COMMIT2_SHA }}"
 
       - name: Delete test ref
-        if: success() || failure()
+        if: always()
         uses: $/.github/actions/delete-ref-action
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
@@ -185,7 +185,7 @@ jobs:
           expected: "${{ env.TEST_COMMIT2_SHA }}"
 
       - name: Delete test ref
-        if: success() || failure()
+        if: always()
         uses: $/.github/actions/delete-ref-action
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
