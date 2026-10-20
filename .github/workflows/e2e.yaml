@@ -39,7 +39,7 @@ jobs:
 
       - name: Get test ref info before Test Run
         id: get-test-ref-info-0
-        uses: ovsds/get-ref-info-action@v1
+        uses: ovsds/get-ref-info-action@fbc82e7980563dcbb87d8ee810e187ba8a4faedb # v1.3.0
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
 
@@ -61,7 +61,7 @@ jobs:
 
       - name: Get test ref info after Test Run
         id: get-test-ref-info-1
-        uses: ovsds/get-ref-info-action@v1
+        uses: ovsds/get-ref-info-action@fbc82e7980563dcbb87d8ee810e187ba8a4faedb # v1.3.0
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
 
@@ -89,7 +89,7 @@ jobs:
 
       - name: Get test ref info after Test Run to validate overwriting
         id: get-test-ref-info-2
-        uses: ovsds/get-ref-info-action@v1
+        uses: ovsds/get-ref-info-action@fbc82e7980563dcbb87d8ee810e187ba8a4faedb # v1.3.0
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
 
@@ -135,7 +135,7 @@ jobs:
 
       - name: Get test ref info before Test Run
         id: get-test-ref-info-0
-        uses: ovsds/get-ref-info-action@v1
+        uses: ovsds/get-ref-info-action@fbc82e7980563dcbb87d8ee810e187ba8a4faedb # v1.3.0
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
 
@@ -168,7 +168,7 @@ jobs:
 
       - name: Get test ref info after Test Run
         id: get-test-ref-info-1
-        uses: ovsds/get-ref-info-action@v1
+        uses: ovsds/get-ref-info-action@fbc82e7980563dcbb87d8ee810e187ba8a4faedb # v1.3.0
         with:
           ref: ${{ steps.prepare-test-ref.outputs.ref }}
 
